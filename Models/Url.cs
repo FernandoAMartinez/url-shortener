@@ -1,9 +1,10 @@
 ﻿using Supabase.Postgrest.Attributes;
+using Supabase.Postgrest.Models;
 
 namespace UrlShortener.Models;
 
 [Table("Urls")]
-public class Url
+public class Url : BaseModel
 {
     [PrimaryKey("id", false)]
     public long Id { get; set; }
