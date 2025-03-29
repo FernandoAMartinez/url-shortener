@@ -1,3 +1,3 @@
 ﻿namespace UrlShortener.Contracts;
 
-public record UrlShortenedResponse(int Id,  string Url, string ShortCode, DateTime CreatedAt, DateTime UpdatedAt);
+public record UrlShortenedResponse(long Id,  string Url, string ShortCode, DateTime CreatedAt, DateTime UpdatedAt, long AccessCount);

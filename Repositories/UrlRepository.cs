@@ -1,17 +1,55 @@
-﻿using UrlShortener.Contracts;
+﻿using Microsoft.IdentityModel.Abstractions;
+using Supabase.Gotrue;
+using Supabase.Realtime;
+using Supabase.Storage;
+using UrlShortener.Contracts;
+using UrlShortener.Helpers;
 
 namespace UrlShortener.Repositories;
 
 public class UrlRepository : IUrlRepository
 {
+    private Supabase.Interfaces.ISupabaseClient<User, Session, RealtimeSocket, RealtimeChannel, Bucket, FileObject> _client;
+
+    public UrlRepository(Supabase.Interfaces.ISupabaseClient<User, Session, RealtimeSocket, RealtimeChannel, Bucket, FileObject> client)
+    {
+        _client = client;
+    }
+
     public async Task<UrlShortenedResponse> CreateShortenUrl(UrlShortenedRequest request)
     {
-        throw new NotImplementedException();
+        var shortenCode = MakeShortenCodeFromUrl(request.Url);
+
+        var model = new Models.Url
+        {
+            UrlAddress = request.Url,
+            ShortCode = shortenCode,
+            AccessCount = 0,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt= DateTime.UtcNow,
+        };
+
+        var response = await _client.From<Models.Url>()
+            .Insert(model);
+
+        if (response.Models.Count.Equals(0))
+            return null;
+
+        var url = response.Models.FirstOrDefault();
+
+        return new UrlShortenedResponse(url.Id, url.UrlAddress, url.ShortCode, url.CreatedAt, url.UpdatedAt, url.AccessCount);
     }
 
     public async Task<UrlShortenedResponse> GetOriginalUrl(string shortenCode)
     {
-        throw new NotImplementedException();
+        var response = await _client.From<Models.Url>().Where(x => x.ShortCode == shortenCode).Get();
+
+        if (response.Models.Count.Equals(0))
+            return null;
+
+        var url = response.Models.FirstOrDefault();
+
+        return new UrlShortenedResponse(url.Id, url.UrlAddress, url.ShortCode, url.CreatedAt, url.UpdatedAt, url.AccessCount);
     }
 
     public string TestUrlShortener(string url) => MakeShortenCodeFromUrl(url);
