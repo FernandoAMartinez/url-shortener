@@ -33,8 +33,7 @@ public class UrlEndpointDefinition : IEndpointDefinition
         });
 
         app.MapGet("/s/{shortenCode}",
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        async ([FromServices] IUrlRepository repository, [FromRoute] string shortenCode) =>
+        [AllowAnonymous] async ([FromServices] IUrlRepository repository, [FromRoute] string shortenCode) =>
         {
             var response = await repository.GetOriginalUrl(shortenCode);
 
@@ -42,17 +41,6 @@ public class UrlEndpointDefinition : IEndpointDefinition
                 return Results.BadRequest();
 
             return Results.Redirect(response.Url);
-        });
-
-        endpoint.MapPost("/test/",
-        [AllowAnonymous] async ([FromServices] IUrlRepository repository, [FromBody] string url) =>
-        {
-            var result = repository.TestUrlShortener(url);
-
-            if (string.IsNullOrEmpty(result))
-                return Results.BadRequest();
-
-            return Results.Ok(result);
         });
     }
 }
