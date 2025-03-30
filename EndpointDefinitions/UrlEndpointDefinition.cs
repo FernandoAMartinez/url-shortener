@@ -37,8 +37,8 @@ public class UrlEndpointDefinition : IEndpointDefinition
         async ([FromServices] IUrlRepository repository, [FromRoute] string shortenCode) =>
         {
             var response = await repository.GetOriginalUrl(shortenCode);
-            
-            if(string.IsNullOrEmpty(response.Url))
+
+            if (string.IsNullOrEmpty(response.Url))
                 return Results.BadRequest();
 
             return Results.Redirect(response.Url);
